@@ -12,15 +12,21 @@ class Redirector
      * @var Session
      */
     private $session;
+    /**
+     * @var Request
+     */
+    private $request;
 
     /**
      * Redirector constructor.
      *
      * @param Session $session
+     * @param Request $request
      */
-    public function __construct(Session $session)
+    public function __construct(Session $session, Request $request)
     {
         $this->session = $session;
+        $this->request = $request;
     }
 
     /**
@@ -30,9 +36,26 @@ class Redirector
      */
     public function to($uri)
     {
+        return $this->createRedirect($uri);
+    }
+
+    /**
+     * @return Redirect
+     */
+    public function back()
+    {
+        return $this->createRedirect($this->request->header('referer'));
+    }
+
+    /**
+     * @param $uri
+     *
+     * @return Redirect
+     */
+    private function createRedirect($uri)
+    {
         $redirect = new Redirect($uri);
         $redirect->setSession($this->session);
-
         return $redirect;
     }
 }

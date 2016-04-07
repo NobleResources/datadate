@@ -1,32 +1,30 @@
 <?php
 
-use DataDate\Extensions\BaseController;
+use DataDate\Http\Controller;
 use DataDate\Http\Request;
+use DataDate\Session;
 use DataDate\Views\View;
 
-class SignUp extends BaseController
+class SignUp extends Controller
 {
-    public function get()
+    public function get(Session $session)
     {
-        return new View('auth.signup', [], $this->session->get('errors'), $this->session->get('old'));
+        return new View('auth.signup', [], $session->get('errors'), $session->get('old'));
     }
 
     public function post(Request $request)
     {
-        $errors = $this->validator->validate($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|min:6|confirmed'
+        $this->validator->validate($request->post(), [
+            'email' => 'required|email|unique:user',
+            'password' => 'required|min:6|confirmed',
         ]);
 
-        if (!empty($errors)) {
-            return $this->redirector->to('/signup')
-                                    ->withErrors($errors)
-                                    ->withOld($request->except([
-                                        'password',
-                                        'password_confirmation']
-                                    ));
-        }
+        $user = User::create([
+            'email' => $request->post('email'),
+            'password' => password_hash($request->post('password'), PASSWORD_BCRYPT),
+        ]);
 
-        return 'Succes!';
+
+        var_dump($user);
     }
 }

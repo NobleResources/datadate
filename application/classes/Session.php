@@ -14,22 +14,11 @@ class Session
      *
      * @param \CI_Session $ciSession
      */
-    private function __construct(\CI_Session $ciSession)
+    public function __construct(\CI_Session $ciSession)
     {
         $this->ciSession = $ciSession;
     }
-
-    /**
-     * @return Session
-     */
-    public static function load()
-    {
-        $ci =& get_instance();
-        $ci->load->library('session');
-
-        return new Session($ci->session);
-    }
-
+    
     /**
      * @param $name
      * @param $value

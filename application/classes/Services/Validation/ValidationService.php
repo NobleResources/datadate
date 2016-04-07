@@ -2,23 +2,42 @@
 
 namespace DataDate\Services\Validation;
 
+use DataDate\Database\Connection;
+use DataDate\Database\Query;
+
 class ValidationService
 {
+    /**
+     * @var Connection
+     */
+    private $connection;
+
     /**
      * @var array
      */
     private $messages = [
         'confirmed' => 'The :name: does not match its confirmation.',
         'required' => 'The :name: field is required.',
+        'unique' => 'The :name: already exists in our database.',
         'email' => 'The :name: field is not a valid email.',
-        'min' => 'The :name: field needs to be a minimum of :0: characters.'
+        'min' => 'The :name: field needs to be a minimum of :0: characters.',
     ];
+
+    /**
+     * ValidationService constructor.
+     *
+     * @param Connection $connection
+     */
+    public function __construct(Connection $connection)
+    {
+        $this->connection = $connection;
+    }
 
     /**
      * @param $data
      * @param $rules
      *
-     * @return array
+     * @throws ValidationException
      */
     public function validate($data, $rules)
     {
@@ -39,7 +58,9 @@ class ValidationService
             }
         }
 
-        return $errors;
+        if (!empty($errors)) {
+            throw new ValidationException($errors);
+        }
     }
 
     /**
@@ -86,6 +107,18 @@ class ValidationService
         $confirmationName = $name . '_confirmation';
 
         return $this->required($confirmationName, $attributes) && $attributes[$confirmationName] === $attributes[$name];
+    }
+
+    /**
+     * @param $name
+     * @param $attributes
+     * @param $table
+     *
+     * @return bool
+     */
+    private function unique($name, $attributes, $table)
+    {
+        return ! (new Query($this->connection))->from($table)->where($name, $attributes[$name])->exists();
     }
 
     /**

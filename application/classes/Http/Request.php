@@ -2,35 +2,23 @@
 
 namespace DataDate\Http;
 
+use CI_Input;
+
 class Request
 {
     /**
-     * @var array
+     * @var CI_Input
      */
-    private $headers;
-    /**
-     * @var array
-     */
-    private $post;
+    private $ciInput;
 
     /**
      * Request constructor.
      *
-     * @param array $headers
-     * @param array $post
+     * @param CI_Input $ciInput
      */
-    private function __construct(array $headers, array $post)
+    public function __construct(CI_Input $ciInput)
     {
-        $this->headers = $headers;
-        $this->post = $post;
-    }
-
-    /**
-     * @return Request
-     */
-    public static function load()
-    {
-        return new Request(getallheaders(), $_POST);
+        $this->ciInput = $ciInput;
     }
 
     /**
@@ -38,25 +26,32 @@ class Request
      *
      * @return mixed|null
      */
-    public function getHeader($name)
+    public function header($name = null)
     {
-        if (isset($this->headers[$name])) {
-            return $this->headers[$name];
+        if ($name !== null) {
+            return $this->ciInput->get_request_header($name, true);
         }
 
-        return null;
-    }
-
-    public function all()
-    {
-        return $this->post;
+        return $this->ciInput->request_headers(true);
     }
 
     /**
-     * @param $keys
+     * @param null $name
+     *
+     * @return mixed $name
      */
-    public function except($keys)
+    public function get($name = null)
     {
-        return array_except($this->all(), $keys);
+        return $this->ciInput->get($name, true);
+    }
+
+    /**
+     * @param null $name
+     *
+     * @return mixed
+     */
+    public function post($name = null)
+    {
+        return $this->ciInput->post($name, true);
     }
 }
