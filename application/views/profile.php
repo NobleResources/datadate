@@ -1,3 +1,4 @@
+<?php /** @var \DataDate\Views\ViewRenderer $this */?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,10 @@
     <title>DataDate</title>
 </head>
 <body>
-    
+    <form method="POST" action="">
+        <?= $this->csrfField() ?>
+       
+        <?= $this->formSubmit('Save') ?>
+    </form>
 </body>
 </html>

@@ -5,7 +5,7 @@ namespace DataDate\Services\Validation;
 use DataDate\Database\Connection;
 use DataDate\Database\Query;
 
-class ValidationService
+class Validator
 {
     /**
      * @var Connection
@@ -16,11 +16,16 @@ class ValidationService
      * @var array
      */
     private $messages = [
-        'confirmed' => 'The :name: does not match its confirmation.',
-        'required' => 'The :name: field is required.',
-        'unique' => 'The :name: already exists in our database.',
-        'email' => 'The :name: field is not a valid email.',
-        'min' => 'The :name: field needs to be a minimum of :0: characters.',
+        'confirmed' => 'The :name: does not match its confirmation',
+        'required' => 'The :name: field is required',
+
+        'unique' => 'The :name: already exists in our database',
+
+        'email' => 'The :name: field is not a valid email',
+
+        'min' => 'The :name: field needs to be at least :0: characters long',
+        'max' => 'The :name: field can not be longer than :0: characters',
+        'between' => 'The :name: field has to be between :0: and :1: characters long',
     ];
 
     /**
@@ -73,6 +78,31 @@ class ValidationService
     private function min($name, $attributes, $minimum)
     {
         return strlen($attributes[$name]) >= $minimum;
+    }
+
+    /**
+     * @param $name
+     * @param $attributes
+     * @param $maximum
+     *
+     * @return bool
+     */
+    private function max($name, $attributes, $maximum)
+    {
+        return strlen($attributes[$name]) <= $maximum;
+    }
+
+    /**
+     * @param $name
+     * @param $attributes
+     * @param $minimum
+     * @param $maximum
+     *
+     * @return bool
+     */
+    private function between($name, $attributes, $minimum, $maximum)
+    {
+        return $this->min($name, $attributes, $minimum) && $this->max($name, $attributes, $maximum);
     }
 
     /**
@@ -143,7 +173,7 @@ class ValidationService
     private function formatMessage($check, $name, $parameters)
     {
         $message = $this->messages[$check];
-        $message = str_replace(':name:', $name, $message);
+        $message = str_replace(':name:', str_replace('_', ' ' ,$name), $message);
 
         foreach ($parameters as $key => $value) {
             $message = str_replace(":$key:", $value, $message);

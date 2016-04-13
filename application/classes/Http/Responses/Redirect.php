@@ -14,11 +14,14 @@ class Redirect extends Response
     /**
      * Redirect constructor.
      *
-     * @param string $uri
+     * @param Session $session
+     * @param string  $uri
      */
-    public function __construct($uri)
+    public function __construct(Session $session, $uri)
     {
         parent::__construct('', 302, ['Location' => $uri]);
+        
+        $this->session = $session;
     }
 
     /**

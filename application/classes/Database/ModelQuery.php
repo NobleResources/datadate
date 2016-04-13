@@ -36,6 +36,28 @@ class ModelQuery
     }
 
     /**
+     * @param      $id
+     * @param null $columns
+     *
+     * @return Model
+     */
+    public function find($id, $columns = null)
+    {
+        $this->query->where('id', $id);
+        return $this->first($columns);
+    }
+
+    /**
+     * @param null $columns
+     *
+     * @return Model
+     */
+    public function first($columns = null)
+    {
+        return array_first($this->limit(1)->get($columns));
+    }
+
+    /**
      * @param null $columns
      *
      * @return Model[]
@@ -45,7 +67,7 @@ class ModelQuery
         $entries = $this->basicQuery()->select($columns);
 
         foreach ($entries as $key => $entry) {
-            $entries[$key] = new Model($entry);
+            $entries[$key] = $this->model->newInstance($entry)->setExists(true);
         }
 
         return $entries;
@@ -58,7 +80,18 @@ class ModelQuery
      */
     public function insert($attributes)
     {
-        return $this->basicQuery()->insert($attributes);
+        $this->model->setExists(true);
+        return $this->basicQuery()->insert($attributes, true);
+    }
+
+    /**
+     * @param $attributes
+     *
+     * @return array
+     */
+    public function update($attributes)
+    {
+        return $this->basicQuery()->update($attributes);
     }
 
     /**
@@ -68,5 +101,19 @@ class ModelQuery
     {
         return $this->query->from($this->model->getTable());
     }
+
+    /**
+     * @param $name
+     * @param $arguments
+     *
+     * @return mixed
+     */
+    function __call($name, $arguments)
+    {
+        call_user_func_array([$this->query, $name], $arguments);
+
+        return $this;
+    }
+
 
 }

@@ -4,184 +4,135 @@ namespace DataDate\Http;
 
 use DataDate\Database\Connection;
 use DataDate\Database\Model;
+use DataDate\Http\Filters\Filter;
 use DataDate\Http\Request;
 use DataDate\Http\Responses\Response;
+use DataDate\Http\Responses\ResponseBuilder;
 use DataDate\Services\ExceptionHandler;
 use DataDate\Services\Redirector;
-use DataDate\Services\Validation\ValidationException;
-use DataDate\Services\Validation\ValidationService;
+use DataDate\Services\Validation\Validator;
 use DataDate\Session;
 use DataDate\Views\View;
+use DataDate\Views\ViewBuilder;
+use DataDate\Views\ViewRenderer;
 use Exception;
-use ReflectionParameter;
 
-class Controller
+abstract class Controller
 {
+    /**
+     * @var \CI_Controller
+     */
+    protected $ci;
+    /**
+     * @var Session
+     */
+    protected $session;
+
     /**
      * @var ExceptionHandler
      */
     private $exceptionHandler;
     /**
-     * @var Session
-     */
-    private $session;
-    /**
-     * @var Request
-     */
-    private $request;
-
-    /**
-     * @var ValidationService
+     * @var Validator
      */
     protected $validator;
     /**
      * @var Redirector
      */
     protected $redirector;
+    /**
+     * @var ViewBuilder
+     */
+    protected $viewBuilder;
+    /**
+     * @var ResponseBuilder
+     */
+    private $responseBuilder;
+    /**
+     * @var RequestBuilder
+     */
+    private $requestBuilder;
 
     /**
      * BaseController constructor.
      */
     public function __construct()
     {
-        $ciController = new \CI_Controller();
+        $this->ci = new \CI_Controller();
 
-        $ciController->load->library('session');
-        $ciController->load->model('user');
+        $this->ci->load->library('session');
+        $this->ci->load->model('user');
+        $this->ci->load->database();
 
-        $connection = new Connection($ciController->load->database('', true));
+        $connection = new Connection($this->ci->db);
         Model::setConnection($connection);
 
-        $this->session = new Session($ciController->session);
-        $this->request = new Request($ciController->input);
-        $this->validator = new ValidationService($connection);
-        $this->redirector = new Redirector($this->session, $this->request);
-        $this->exceptionHandler = new ExceptionHandler($this->redirector, $this->request);
+        $this->session = new Session($this->ci->session);
+
+        $this->validator = new Validator($connection);
+
+        $this->viewBuilder = new ViewBuilder($this->session);
+        $this->requestBuilder = new RequestBuilder($this->ci->input, $this->session);
+        $this->responseBuilder = new ResponseBuilder(new ViewRenderer());
+
     }
 
     /**
-     * @param       $method
-     * @param array $routeParameters
-     *
-     * @throws Exception
+     * @param string $method
+     * @param array $parameters
      */
-    public function _remap($method, $routeParameters = [])
+    public function _remap($method, $parameters = [])
     {
-        $this->sendResponse($this->getResponse($method, $routeParameters));
+        $request = $this->requestBuilder->build($parameters);
+
+        $this->redirector = new Redirector($this->session, $request);
+        $this->exceptionHandler = new ExceptionHandler($this->redirector, $request);
+
+        $requestStack = new RequestStack($request, [$this, $method], $this->filters());
+
+        try {
+            $this->responseBuilder->build($requestStack->run())->send();
+        } catch (Exception $exception) {
+            $this->exceptionHandler->handle($exception)->send();
+        }
     }
 
     /**
-     * @param       $method
-     * @param array $routeParameters
-     *
-     * @return Response|View|mixed
-     * @throws ValidationException
+     * @return Filter[]
      */
-    public function getResponse($method, $routeParameters = [])
+    public function filters()
+    {
+        return [];
+    }
+
+    /**
+     * @param string  $method
+     * @param Request $request
+     *
+     * @return Response
+     * @throws Exception
+     *
+     */
+    public function runMethod($method, Request $request)
     {
         if (!method_exists($this, $method)) {
             return new View('errors.404');
         }
-
         try {
-            return $this->callMethod($method, $this->prepareParameters($method, $routeParameters));
+            return $this->callMethod($method, $request);
         } catch (Exception $exception) {
             return $this->exceptionHandler->handle($exception);
         }
     }
 
     /**
-     * @param mixed $response
-     */
-    private function sendResponse($response)
-    {
-        $response = $this->makeResponse($response);
-        $response->send();
-    }
-
-    /**
-     * @param mixed $response
-     *
-     * @return Response
-     */
-    private function makeResponse($response)
-    {
-        if ($response instanceof Response) {
-            return $response;
-        }
-
-        if ($response instanceof View) {
-            $content = $response->render();
-            return new Response($content, 200);
-        }
-
-        return new Response($response, 200);
-    }
-
-    /**
      * @param $method
-     * @param $routeParameters
+     * @param $request
      *
      * @return mixed
      */
-    private function prepareParameters($method, $routeParameters)
+    private function callMethod($method, Request $request)
     {
-        $parameters = $this->getParameters($method);
-
-        foreach ($parameters as $index => $parameter) {
-            $parameters[$index] = $this->prepareParameter($parameter, $routeParameters);
-        }
-
-        return $parameters;
-    }
-
-    /**
-     * @param ReflectionParameter  $parameter
-     * @param                      $routeParameters
-     *
-     * @return Request
-     */
-    private function prepareParameter(ReflectionParameter $parameter, &$routeParameters)
-    {
-        $class = $parameter->getClass();
-
-        if ($class === null) {
-            return array_shift($routeParameters);
-        }
-
-        $className = $class->getName();
-
-        if ($className === Request::class) {
-            return $this->request;
-        }
-
-        if ($className === Session::class) {
-            return $this->session;
-        }
-
-        return null;
-    }
-
-    /**
-     * @param $method
-     * @param $parameters
-     *
-     * @return mixed
-     */
-    private function callMethod($method, $parameters)
-    {
-        return call_user_func_array([$this, $method], $parameters);
-    }
-
-    /**
-     * @param $method
-     *
-     * @return ReflectionParameter[]
-     */
-    private function getParameters($method)
-    {
-        $reflection = new \ReflectionMethod($this, $method);
-        $parameters = $reflection->getParameters();
-        return $parameters;
+        return call_user_func([$this, $method], $request);
     }
 }

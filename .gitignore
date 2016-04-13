@@ -1,4 +1,5 @@
 /system
+/tmp/*
 
 .DS_Store
 

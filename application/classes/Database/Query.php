@@ -16,6 +16,10 @@ class Query
      * @var array
      */
     private $where;
+    /**
+     * @var int
+     */
+    private $limit;
 
     /**
      * Query constructor.
@@ -45,9 +49,13 @@ class Query
      *
      * @return $this
      */
-    public function where($column, $value)
+    public function where($column, $value = null)
     {
-        $this->where[] = sprintf('%s = %s', $this->formatColumn($column), $this->formatValue($value));
+        $wheres = isset($value) ? [$column => $value] : $column;
+
+        foreach ($wheres as $column => $value) {
+            $this->where[] = sprintf('%s = %s', $this->formatColumn($column), $this->formatValue($value));
+        }
 
         return $this;
     }
@@ -79,13 +87,36 @@ class Query
     }
 
     /**
-     * @param $attributes
+     * @param int $limit
+     *
+     * @return $this
+     */
+    public function limit($limit)
+    {
+        $this->limit = $limit;
+        return $this;
+    }
+
+    /**
+     * @param      $attributes
+     * @param bool $returnInserted
      *
      * @return mixed
      */
-    public function insert($attributes)
+    public function insert($attributes, $returnInserted = false)
     {
-        return $this->connection->runQuery($this->buildInsert($attributes));
+        $result = $this->connection->runQuery($this->buildInsert($attributes));
+
+        if ($returnInserted) {
+            $result = array_first($this->where($attributes)->limit(1)->select());
+        }
+
+        return $result;
+    }
+
+    public function update($attributes)
+    {
+        return $this->connection->runQuery($this->buildUpdate($attributes));
     }
 
     /**
@@ -101,6 +132,17 @@ class Query
             $this->buildColumns(array_keys($attributes)),
             $this->buildValues($attributes)
         );
+    }
+
+    private function buildUpdate($attributes)
+    {
+        $id = (int) $attributes['id'];
+        unset($attributes['id']);
+
+        return sprintf("UPDATE %s SET %s WHERE `id` = %d",
+            $this->table,
+            $this->buildSet($attributes),
+            $id);
     }
 
     /**
@@ -123,6 +165,20 @@ class Query
         $where = $this->buildWhere();
 
         return sprintf('SELECT %s FROM %s WHERE %s', $select, $this->table, $where);
+    }
+
+    /**
+     * @param $attributes
+     *
+     * @return mixed
+     */
+    private function buildSet($attributes)
+    {
+        foreach ($attributes as $column => $value) {
+            $attributes[$column] = $this->formatAssignment($value, $column);
+        }
+
+        return implode(',', $attributes);
     }
 
     /**
@@ -161,9 +217,9 @@ class Query
      *
      * @return mixed
      */
-    public function formatWhere($value, $column)
+    public function formatAssignment($value, $column)
     {
-        return sprintf('%s = %s', $this->formatColumn($column), $this->formatValue($value));
+        return sprintf('%s=%s', $this->formatColumn($column), $this->formatValue($value));
     }
 
     /**

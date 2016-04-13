@@ -1,14 +1,15 @@
 <?php
 
-use Extensions\BaseController;
+use DataDate\Http\Controller;
 
-class Migrate extends BaseController
+class Migrate extends Controller
 {
     public function index()
     {
-        $this->load->library('migration');
-        if ($this->migration->current() === false) {
-            show_error($this->migration->error_string());
+        $this->ci->load->library('migration');
+
+        if ($this->ci->migration->current() === false) {
+            show_error($this->ci->migration->error_string());
         }
     }
 }

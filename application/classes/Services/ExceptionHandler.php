@@ -3,7 +3,6 @@
 namespace DataDate\Services;
 
 use DataDate\Http\Request;
-use DataDate\Http\Responses\Redirect;
 use DataDate\Http\Responses\Response;
 use DataDate\Services\Validation\ValidationException;
 use Exception;

@@ -93,6 +93,7 @@ $autoload['helper'] = [
     'view',
     'debug',
     'array',
+    'stack'
 ];
 
 /*

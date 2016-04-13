@@ -3,6 +3,8 @@
 namespace DataDate\Http;
 
 use CI_Input;
+use DataDate\Session;
+use User;
 
 class Request
 {
@@ -10,15 +12,26 @@ class Request
      * @var CI_Input
      */
     private $ciInput;
-
+    /**
+     * @var Session
+     */
+    private $session;
+    /**
+     * @var array
+     */
+    private $routeParameters;
+    
     /**
      * Request constructor.
      *
      * @param CI_Input $ciInput
+     * @param Session  $session
      */
-    public function __construct(CI_Input $ciInput)
+    public function __construct(CI_Input $ciInput, Session $session, $parameters)
     {
         $this->ciInput = $ciInput;
+        $this->session = $session;
+        $this->routeParameters = $parameters;
     }
 
     /**
@@ -53,5 +66,26 @@ class Request
     public function post($name = null)
     {
         return $this->ciInput->post($name, true);
+    }
+
+    /**
+     * @return null|User
+     */
+    public function getUser()
+    {
+        return $this->session->getUser();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGuest()
+    {
+        return $this->session->isGuest();
+    }
+
+    public function uri()
+    {
+        return $this->ciInput->server('REQUEST_URI');
     }
 }

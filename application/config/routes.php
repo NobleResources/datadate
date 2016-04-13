@@ -7,7 +7,18 @@ $route = [
     'translate_uri_dashes' => false,
 
     'signup' => [
-        'post' => 'auth/signup/post',
-        'get' => 'auth/signup/get',
+        'post' => 'Auth/SignUp/post',
+        'get' => 'Auth/SignUp/get',
+    ],
+
+    'signin' => [
+        'post' => 'Auth/SignIn/post',
+        'get' => 'Auth/SignIn/get',
+    ],
+
+    'profile' => [
+        'get' => 'Profile/get',
+        'post' => 'Profile/post',
     ]
+
 ];

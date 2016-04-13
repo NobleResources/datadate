@@ -2,10 +2,10 @@
 
 use DataDate\Http\Controller;
 
-class Info extends Controller
+class Test extends Controller
 {
     public function index()
     {
-        phpinfo();
+        run();
     }
 }

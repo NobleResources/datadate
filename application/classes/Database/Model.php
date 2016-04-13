@@ -10,11 +10,18 @@ class Model
      * @var Connection
      */
     protected static $connection;
-
     /**
      * @var array
      */
-    protected $attributes;
+    protected $attributes = [];
+    /**
+     * @var array
+     */
+    protected $updated = [];
+    /**
+     * @var boolean
+     */
+    protected $exists = false;
 
     /**
      * Model constructor.
@@ -23,7 +30,7 @@ class Model
      */
     public function __construct(array $attributes = [])
     {
-        $this->attributes = $attributes;
+        $this->setAttributes($attributes);
     }
 
     /**
@@ -50,17 +57,71 @@ class Model
     public static function create($attributes)
     {
         $instance = new static($attributes);
-        $instance->save();
 
-        return $instance;
+        return new static($instance->save());
     }
 
     /**
-     * @return boolean
+     * @param $attributes
+     */
+    public function update($attributes)
+    {
+        $this->setAttributes($attributes);
+        return (new static)->newQuery()->update($attributes + ['id' => $this->id]);
+    }
+
+    /**
+     * @return int
      */
     public function save()
     {
         return (new static)->newQuery()->insert($this->attributes);
+    }
+
+    /**
+     * @param array $attributes
+     *
+     * @return static
+     */
+    public function newInstance($attributes = [])
+    {
+        return new static($attributes);
+    }
+
+    /**
+     * @return ModelQuery
+     */
+    public function newQuery()
+    {
+        return (new ModelQuery(new Query(static::$connection)))->setModel($this);
+    }
+
+    /**
+     * @param boolean $exists
+     *
+     * @return $this
+     */
+    public function setExists($exists)
+    {
+        $this->exists = $exists;
+        return $this;
+    }
+
+    /**
+     * @param Connection $connection
+     */
+    public static function setConnection(Connection $connection)
+    {
+        static::$connection = $connection;
+    }
+
+    /**
+     * @param array $attributes
+     */
+    public function setAttributes($attributes)
+    {
+        $this->attributes = array_merge($this->attributes, $attributes);
+        $this->updated = array_keys($attributes);
     }
 
     /**
@@ -70,7 +131,7 @@ class Model
      */
     function __get($name)
     {
-        return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
+        return array_key_exists($name, $this->attributes) ? $this->attributes[$name] : null;
     }
 
     /**
@@ -95,21 +156,5 @@ class Model
         $instance = new static;
 
         return call_user_func_array([$instance, $name], $arguments);
-    }
-
-    /**
-     * @param Connection $connection
-     */
-    public static function setConnection(Connection $connection)
-    {
-        static::$connection = $connection;
-    }
-
-    /**
-     * @return ModelQuery
-     */
-    public function newQuery()
-    {
-        return (new ModelQuery(new Query(static::$connection)))->setModel($this);
     }
 }

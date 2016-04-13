@@ -36,7 +36,7 @@ class Redirector
      */
     public function to($uri)
     {
-        return $this->createRedirect($uri);
+        return new Redirect($this->session, $uri);
     }
 
     /**
@@ -44,18 +44,24 @@ class Redirector
      */
     public function back()
     {
-        return $this->createRedirect($this->request->header('referer'));
+        return $this->to($this->request->header('referer'));
     }
 
     /**
-     * @param $uri
-     *
      * @return Redirect
      */
-    private function createRedirect($uri)
+    public function guest()
     {
-        $redirect = new Redirect($uri);
-        $redirect->setSession($this->session);
-        return $redirect;
+        $this->session->flash('intended', $this->request->uri());
+
+        return $this->to('signin');
+    }
+
+    /**
+     * @return Redirect
+     */
+    public function intended()
+    {
+        return $this->to($this->session->pull('intended', '/'));
     }
 }

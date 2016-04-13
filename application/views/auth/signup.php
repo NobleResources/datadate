@@ -1,3 +1,4 @@
+<?php /** @var \DataDate\Views\ViewRenderer $this */?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,13 +7,24 @@
     <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
-    <form action="/signup" method="POST">
-        <?= csrf_field() ?>
-        <?= form_field('email', 'email', $this->getOld('email'), $this->getFirstError('email')) ?>
-        <?= form_field('password', 'password', '', $this->getFirstError('password')) ?>
-        <?= form_field('password_confirmation', 'password') ?>
-        <div class="form-field"><button type="submit">Sign up!</button></div>
+<header>
+    <h1>DataDate</h1>
+</header>
+<div class="content">
+    <form id="signup-form" action="" method="POST">
+        <?= $this->csrfField() ?>
+        <?= $this->errorList() ?>
+        <?= $this->formInput('email', 'email') ?>
+        <?= $this->formInput('nickname', 'text')?>
+        <?= $this->formInput('password', 'password', false) ?>
+        <?= $this->formInput('password_confirmation', 'password', false) ?>
+        <?= $this->formInput('first_name', 'text')?>
+        <?= $this->formInput('last_name', 'text')?>
+        <?= $this->formSelect('gender', ['male' => 'Male', 'female' => 'Female']) ?>
+        <?= $this->formInput('birthday', 'date')?>
+        <?= $this->formSubmit('Sign up') ?>
     </form>
+</div>
 </body>
 </html>
 
