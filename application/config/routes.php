@@ -3,18 +3,20 @@
 
 $route = [
     '404_override' => '',
-    'default_controller' => 'welcome',
+    'default_controller' => 'Site',
     'translate_uri_dashes' => false,
 
     'signup' => [
-        'post' => 'Auth/SignUp/post',
-        'get' => 'Auth/SignUp/get',
+        'post' => 'Authentication/signUp',
+        'get' => 'Authentication/signUpForm',
     ],
 
     'signin' => [
-        'post' => 'Auth/SignIn/post',
-        'get' => 'Auth/SignIn/get',
+        'post' => 'Authentication/signIn',
+        'get' => 'Authentication/signInForm',
     ],
+
+    'signout' => 'Authentication/signOut',
 
     'profile' => [
         'get' => 'Profile/get',

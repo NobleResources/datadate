@@ -10,7 +10,7 @@ class ResponseBuilder
     /**
      * @var ViewRenderer
      */
-    private $viewRenderen;
+    private $viewRenderer;
 
     /**
      * ResponseBuilder constructor.
@@ -19,7 +19,7 @@ class ResponseBuilder
      */
     public function __construct(ViewRenderer $viewRenderen)
     {
-        $this->viewRenderen = $viewRenderen;
+        $this->viewRenderer = $viewRenderen;
     }
 
     /**
@@ -34,7 +34,7 @@ class ResponseBuilder
         }
 
         if ($response instanceof View) {
-            $content = $this->viewRenderen->render($response);
+            $content = $this->viewRenderer->render($response);
             return new Response($content, 200);
         }
 

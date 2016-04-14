@@ -12,6 +12,7 @@ use DataDate\Services\ExceptionHandler;
 use DataDate\Services\Redirector;
 use DataDate\Services\Validation\Validator;
 use DataDate\Session;
+use DataDate\Views\HtmlHelper;
 use DataDate\Views\View;
 use DataDate\Views\ViewBuilder;
 use DataDate\Views\ViewRenderer;
@@ -71,9 +72,8 @@ abstract class Controller
 
         $this->validator = new Validator($connection);
 
-        $this->viewBuilder = new ViewBuilder($this->session);
         $this->requestBuilder = new RequestBuilder($this->ci->input, $this->session);
-        $this->responseBuilder = new ResponseBuilder(new ViewRenderer());
+        $this->responseBuilder = new ResponseBuilder(new ViewRenderer(new HtmlHelper()));
 
     }
 
@@ -84,7 +84,7 @@ abstract class Controller
     public function _remap($method, $parameters = [])
     {
         $request = $this->requestBuilder->build($parameters);
-
+        $this->viewBuilder = new ViewBuilder($this->session, $request);
         $this->redirector = new Redirector($this->session, $request);
         $this->exceptionHandler = new ExceptionHandler($this->redirector, $request);
 

@@ -3,6 +3,7 @@
 namespace DataDate\Views;
 
 
+use DataDate\Http\Request;
 use DataDate\Session;
 
 class ViewBuilder
@@ -11,15 +12,21 @@ class ViewBuilder
      * @var Session
      */
     private $session;
+    /**
+     * @var Request
+     */
+    private $request;
 
     /**
      * ViewBuilder constructor.
      *
      * @param Session $session
+     * @param Request $request
      */
-    public function __construct(Session $session)
+    public function __construct(Session $session, Request $request)
     {
         $this->session = $session;
+        $this->request = $request;
     }
 
     /**
@@ -33,7 +40,7 @@ class ViewBuilder
     {
         $path = $this->getPath($name);
         if (is_file($path)) {
-            return new View($path, $this->addOldAndErrors($data));
+            return new View($path, $this->buildData($data));
         }
 
         throw new ViewNotFoundException($name);
@@ -54,11 +61,13 @@ class ViewBuilder
      *
      * @return mixed
      */
-    private function addOldAndErrors($data)
+    private function buildData($data)
     {
         return $data + [
             'errors' => $this->session->get('errors'),
+            'user' => $this->session->getUser(),
             'old' => $this->session->get('old'),
+            'uri' => $this->request->uri(),
         ];
     }
 

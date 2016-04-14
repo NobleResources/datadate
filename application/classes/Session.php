@@ -84,6 +84,12 @@ class Session
         return $userId === null ? null : User::find($userId);
     }
 
+    
+    public function unsetUser()
+    {
+        $this->ciSession->unset_userdata('userId');
+    }
+
     /**
      * @return boolean
      */

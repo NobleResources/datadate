@@ -11,24 +11,59 @@ body {
     margin: 0;
 }
 
-header {
+
+header, nav {
+    background-color: cornflowerblue;
     display: flex;
     flex-direction: row;
-    padding: 20px;
-    background-color: cornflowerblue;
+    padding: 10px 20px 10px 20px;
 }
 
 header > h1{
+    font-size: 36pt;
+    font-weight: 500;
     color: white;
+    margin: 0;
+}
+
+nav {
+    border-top: 1px solid #eee;
+    display: flex;
+    flex-direction: row;
+}
+
+nav > div {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+nav > div:last-child {
+    justify-content: flex-end;
+}
+
+.button{
+    text-decoration: none;
+    border: 1px solid white;
+    border-radius: 4px;
+    padding: 5px;
+    color: white;
+}
+
+.button:hover {
+    border-color: darkorange;
+    color: darkorange;
 }
 
 .content {
     display: flex;
     flex-direction: column;
     justify-content: center;
+
+    padding: 20px;
 }
 
-#signup-form     {
+form {
     align-self: center;
 }
 
@@ -67,7 +102,7 @@ label {
     margin-left: 10px;
 }
 
-input, select, button {
+input, select, button, textarea {
     flex-grow: 1;
     width: 350px;
 
@@ -76,6 +111,10 @@ input, select, button {
 
     border: 1px solid #bbb;
     border-radius: 3px;
+}
+
+textarea {
+    resize: vertical;
 }
 
 button {

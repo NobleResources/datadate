@@ -7,11 +7,11 @@ class View
     /**
      * @var array
      */
-    public $data;
+    private $data;
     /**
      * @var
      */
-    public $path;
+    private $path;
 
     /**
      * View constructor.
@@ -23,5 +23,45 @@ class View
     {
         $this->data = $data;
         $this->path = $path;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * @return array
+     */
+    public function getErrors()
+    {
+        if (isset($this->data['errors'])) {
+            return $this->data['errors'];
+        }
+
+        return [];
+    }
+
+    /**
+     * @return array
+     */
+    public function getOld()
+    {
+        if (isset($this->data['old'])) {
+            return $this->data['old'];
+        }
+
+        return [];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPath()
+    {
+        return $this->path;
     }
 }
