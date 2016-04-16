@@ -3,20 +3,23 @@
 namespace DataDate\Database;
 
 use CI_DB;
+use CI_DB_active_record;
+use CI_DB_driver;
+use CI_DB_result;
 
 class Connection
 {
     /**
-     * @var \CI_DB_driver
+     * @var CI_DB_driver
      */
     private $ci;
 
     /**
      * Connection constructor.
      *
-     * @param CI_DB $ci
+     * @param CI_DB_active_record|CI_DB_driver $ci
      */
-    public function __construct(CI_DB $ci)
+    public function __construct(CI_DB_driver $ci)
     {
         $this->ci = $ci;
     }
@@ -30,7 +33,7 @@ class Connection
     {
         $result = $this->ci->query($query);
 
-        if ($result instanceof \CI_DB_result) {
+        if ($result instanceof CI_DB_result) {
             return $result->result_array();
         }
 

@@ -2,6 +2,8 @@
 
 namespace DataDate\Services;
 
+use DataDate\Http\Exceptions\HttpException;
+use DataDate\Http\Exceptions\NotFoundException;
 use DataDate\Http\Request;
 use DataDate\Http\Responses\Response;
 use DataDate\Services\Validation\ValidationException;
@@ -43,6 +45,10 @@ class ExceptionHandler
                 ->back()
                 ->withErrors($e->getErrors())
                 ->withOld($this->request->post());
+        }
+
+        if ($e instanceof HttpException) {
+            return $e->toResponse();
         }
 
         throw $e;

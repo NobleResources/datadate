@@ -2,6 +2,8 @@
 
 namespace DataDate\Database;
 
+use DataDate\Database\Models\Model;
+
 class ModelQuery
 {
     /**

@@ -2,21 +2,29 @@
 
 namespace DataDate\Views;
 
+use DataDate\Services\UrlGenerator;
+
 class ViewRenderer
 {
     /**
      * @var HtmlHelper
      */
-    private $htmlHelper;
+    private $html;
+    /**
+     * @var UrlGenerator
+     */
+    private $url;
 
     /**
      * ViewRenderer constructor.
      *
-     * @param HtmlHelper $htmlHelper
+     * @param HtmlHelper   $htmlHelper
+     * @param UrlGenerator $urlGenerator
      */
-    public function __construct(HtmlHelper $htmlHelper)
+    public function __construct(HtmlHelper $htmlHelper, UrlGenerator $urlGenerator)
     {
-        $this->htmlHelper = $htmlHelper;
+        $this->html = $htmlHelper;
+        $this->url = $urlGenerator;
     }
 
     /**
@@ -26,8 +34,9 @@ class ViewRenderer
      */
     public function render(View $view)
     {
-        $this->htmlHelper->setErrors($view->getErrors());
-        $this->htmlHelper->setOld($view->getOld());
+        $this->html->setErrors($view->getErrors());
+        $this->html->setOld($view->getOld());
+        $this->html->setModel($view->getModel());
 
         ob_start();
         extract($view->getData(), EXTR_OVERWRITE);
@@ -38,16 +47,5 @@ class ViewRenderer
         include VIEWPATH . 'layouts/main.php';
 
         return ob_get_clean();
-    }
-
-    /**
-     * @param $name
-     * @param $arguments
-     *
-     * @return mixed
-     */
-    function __call($name, $arguments)
-    {
-        return call_user_func_array([$this->htmlHelper, $name], $arguments);
     }
 }

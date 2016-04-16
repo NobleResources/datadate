@@ -2,7 +2,7 @@
 
 use DataDate\Http\Controller;
 
-class Migrate extends Controller
+class MigrationController extends Controller
 {
     public function index()
     {

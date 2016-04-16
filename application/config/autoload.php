@@ -90,10 +90,8 @@ $autoload['drivers'] = array();
 |	$autoload['helper'] = array('url', 'file');
 */
 $autoload['helper'] = [
-    'view',
-    'debug',
     'array',
-    'stack'
+    'string',
 ];
 
 /*

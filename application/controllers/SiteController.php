@@ -3,7 +3,7 @@
 use DataDate\Http\Controller;
 use DataDate\Http\Filters\AuthenticatesUser;
 
-class Site extends Controller
+class SiteController extends Controller
 {
     public function filters()
     {
@@ -12,6 +12,6 @@ class Site extends Controller
 
     public function index()
     {
-        return $this->viewBuilder->build('home');
+        return $this->viewBuilder->build('home', ['user' => $this->session->getUser()]);
     }
 }

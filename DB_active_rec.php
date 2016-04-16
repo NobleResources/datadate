@@ -1843,7 +1843,7 @@ class CI_DB_active_record extends CI_DB_driver
 			{
 				// Cycle through the "select" portion of the query and prep each column name.
 				// The reason we protect identifiers here rather then in the select() function
-				// is because until the user calls the from() function we don't know if there are aliases
+				// is because until the users calls the from() function we don't know if there are aliases
 				foreach ($this->ar_select as $key => $val)
 				{
 					$no_escape             = isset($this->ar_no_escape[$key]) ? $this->ar_no_escape[$key] : NULL;

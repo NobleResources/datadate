@@ -9,6 +9,15 @@ function array_first(array $array)
     return null;
 }
 
+function array_last(array $array)
+{
+    if (empty($array)) {
+        return null;
+    }
+
+    return $array[count($array) - 1];
+}
+
 function array_except($array, $except)
 {
     $except = is_array($except) ? $except : [$except];
@@ -24,9 +33,15 @@ function array_except($array, $except)
 
 function array_only($array, $keys)
 {
-    return array_filter($array, function ($key) use ($keys) {
-        return array_key_exists($key, $keys);
-    }, ARRAY_FILTER_USE_KEY);
+    $keys = is_array($keys) ? $keys : [$keys];
+
+    foreach ($array as $key => $value) {
+        if (array_search($key, $keys) === false) {
+            unset ($array[$key]);
+        }
+    }
+
+    return $array;
 }
 
 function array_prepend(&$array, $item) {

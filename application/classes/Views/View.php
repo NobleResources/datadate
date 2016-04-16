@@ -2,6 +2,8 @@
 
 namespace DataDate\Views;
 
+use DataDate\Database\Models\Model;
+
 class View
 {
     /**
@@ -55,6 +57,18 @@ class View
         }
 
         return [];
+    }
+
+    /**
+     * @return Model|null
+     */
+    public function getModel()
+    {
+        if (isset($this->data['model'])) {
+            return $this->data['model'];
+        }
+
+        return null;
     }
 
     /**

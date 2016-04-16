@@ -46,7 +46,7 @@ nav > div:last-child {
     text-decoration: none;
     border: 1px solid white;
     border-radius: 4px;
-    padding: 5px;
+    padding: 6px;
     color: white;
 }
 
@@ -63,11 +63,30 @@ nav > div:last-child {
     padding: 20px;
 }
 
-form {
+form, .overview {
     align-self: center;
 }
 
-.form-row {
+
+.error-input {
+border-color: indianred;
+}
+
+.error-list {
+margin: 0;
+padding: 0;
+}
+
+.error-list > li {
+color: white;
+background-color: indianred;
+list-style: none;
+padding: 10px;
+margin: 10px;
+border-radius: 4px;
+}
+
+.row {
     max-width: 600px;
     display: flex;
     flex-direction: row;
@@ -76,25 +95,20 @@ form {
     justify-content: flex-end;
 }
 
-.error-input {
-    border-color: indianred;
-}
+.row > *:not(label) {
+    flex-grow: 1;
+    width: 350px;
 
-.error-list {
-    margin: 0;
-    padding: 0;
-}
-
-.error-list > li {
-    color: white;
-    background-color: indianred;
-    list-style: none;
     padding: 10px;
     margin: 10px;
-    border-radius: 4px;
 }
 
-label {
+.row > *:not(label, h1, img) {
+    border: 1px solid #bbb;
+    border-radius: 3px;
+}
+
+.row > label {
     flex-grow: 1;
     width: 175px;
     display: block;
@@ -102,22 +116,11 @@ label {
     margin-left: 10px;
 }
 
-input, select, button, textarea {
-    flex-grow: 1;
-    width: 350px;
-
-    padding: 10px;
-    margin: 10px;
-
-    border: 1px solid #bbb;
-    border-radius: 3px;
-}
-
-textarea {
+.row > textarea {
     resize: vertical;
 }
 
-button {
+.row > button {
     background-color: cornflowerblue;
     font-weight: 500;
     font-size: 16pt;

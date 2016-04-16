@@ -4,7 +4,7 @@ namespace DataDate\Http\Responses;
 
 use DataDate\Session;
 
-class Redirect extends Response
+class RedirectResponse extends Response
 {
     /**
      * @var Session
@@ -20,7 +20,7 @@ class Redirect extends Response
     public function __construct(Session $session, $uri)
     {
         parent::__construct('', 302, ['Location' => $uri]);
-        
+
         $this->session = $session;
     }
 

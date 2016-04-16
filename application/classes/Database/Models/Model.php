@@ -1,8 +1,11 @@
 <?php
 
-namespace DataDate\Database;
+namespace DataDate\Database\Models;
 
 use CI_DB;
+use DataDate\Database\Connection;
+use DataDate\Database\ModelQuery;
+use DataDate\Database\Query;
 
 class Model
 {
@@ -30,7 +33,7 @@ class Model
      */
     public function __construct(array $attributes = [])
     {
-        $this->setAttributes($attributes);
+        $this->attributes = $attributes;
     }
 
     /**
@@ -38,7 +41,7 @@ class Model
      */
     public function getTable()
     {
-        return strtolower(get_class($this));
+        return strtolower(array_last(explode('\\', get_class($this))));
     }
 
     /**
@@ -75,7 +78,11 @@ class Model
      */
     public function save()
     {
-        return (new static)->newQuery()->insert($this->attributes);
+        if (!$this->exists) {
+            return (new static)->newQuery()->insert($this->attributes);
+        }
+
+        return $this->update(array_only($this->attributes, $this->updated));
     }
 
     /**
@@ -129,9 +136,19 @@ class Model
      *
      * @return mixed|null
      */
-    function __get($name)
+    public function __get($name)
     {
         return array_key_exists($name, $this->attributes) ? $this->attributes[$name] : null;
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     */
+    public function __set($name, $value)
+    {
+        $this->updated[] = $name;
+        $this->attributes[$name] = $value;
     }
 
     /**
@@ -156,5 +173,15 @@ class Model
         $instance = new static;
 
         return call_user_func_array([$instance, $name], $arguments);
+    }
+
+    /**
+     * @param $name
+     *
+     * @return bool
+     */
+    public function __isset($name)
+    {
+        return isset($this->attributes[$name]);
     }
 }

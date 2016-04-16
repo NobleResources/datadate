@@ -2,7 +2,7 @@
 
 namespace DataDate\Views;
 
-use DataDate\Database\Model;
+use DataDate\Database\Models\Model;
 
 class HtmlHelper
 {
@@ -20,14 +20,14 @@ class HtmlHelper
     private $old = [];
 
     /**
-     * @param $field
+     * @param $name
      *
      * @return string
      */
-    public function getFirstError($field)
+    public function firstError($name)
     {
-        if (isset($this->errors[$field])) {
-            return array_first($this->errors[$field]);
+        if (isset($this->errors[$name])) {
+            return array_first($this->errors[$name]);
         }
 
         return '';
@@ -46,90 +46,63 @@ class HtmlHelper
         return "<input type='hidden' name='$name' value='$value'>";
     }
 
-    public function textArea($name)
+    public function display($name)
     {
-        $textArea = sprintf('<textarea name="%s">%s</textarea>', $name, $this->getOld($name));
-
-        return $this->formRow($this->getLabel($name), $textArea);
+        return $this->formRow($this->formatLabel($name), sprintf('<div>%s</div>', $this->getModelValue($name)));
     }
 
     /**
      * @param string $name
      * @param string $type
+     * @param bool   $rememberOld
+     * @param array  $attributes
      *
+     * @return mixed
+     */
+    public function input($name, $type, $rememberOld = true, $attributes = [])
+    {
+        $attributes = $this->maybeAddError($name, $attributes);
+        $attributes = $this->attributeList($attributes);
+
+        $value = $this->getValue($name, $rememberOld);
+
+        $input = sprintf('<input name="%s" type="%s" value="%s" %s>', $name, $type, $value, $attributes);
+
+        return $this->formRow($this->formatLabel($name), $input);
+    }
+
+    /**
+     * @param string $name
      * @param bool   $rememberOld
      *
      * @return string
      */
-    public function formInput($name, $type, $rememberOld = true)
+    public function textArea($name, $rememberOld = true)
     {
         $value = $this->getValue($name, $rememberOld);
 
-        return $this->formRow($this->getLabel($name), $this->input($name, $type, $value));
-    }
+        $textArea = sprintf('<textarea name="%s">%s</textarea>', $name, $value);
 
-    /**
-     * @param      $name
-     * @param      $options
-     * @param bool $rememberOld
-     *
-     * @return mixed
-     */
-    public function formSelect($name, $options, $rememberOld = true)
-    {
-        return $this->formRow($this->getLabel($name), $this->select($name, $options));
-    }
-
-    /**
-     * @param $label
-     *
-     * @return mixed
-     */
-    public function formSubmit($label)
-    {
-        return $this->formRow('', sprintf('<button type="submit">%s</button>', $label));
-    }
-
-    /**
-     * @param $label
-     * @param $input
-     *
-     * @return mixed
-     */
-    private function formRow($label, $input)
-    {
-        return sprintf('<div class="form-row"><label>%s</label>%s</div>', $label, $input);
-    }
-
-    /**
-     * @param string $name
-     * @param string $type
-     * @param string $value
-     *
-     * @return mixed
-     */
-    public function input($name, $type, $value)
-    {
-        if ($type === 'select') {
-            return $this->select($name, $value);
-        }
-
-        return sprintf('<input name="%s" type="%s" value="%s" %s>', $name, $type, $value, $this->getInputClass($name));
+        return $this->formRow($this->formatLabel($name), $textArea);
     }
 
     /**
      * @param string $name
      * @param array  $options
+     * @param array  $attributes
      *
      * @return mixed
      */
-    public function select($name, $options)
+    public function select($name, $options, $attributes = [])
     {
-        $class = $this->getInputClass($name);
+        $attributes = $this->maybeAddError($name, $attributes);
+        $attributes = $this->attributeList($attributes);
 
         $options = $this->options($options, $this->getOld($name, null));
 
-        return sprintf('<select name="%s" %s >%s</select>', $name, $class, $options);
+        $select = sprintf('<select name="%s" %s >%s</select>', $name, $attributes, $options);
+
+        return $this->formRow($this->formatLabel($name), $select);
     }
 
     /**
@@ -151,54 +124,26 @@ class HtmlHelper
     }
 
     /**
-     * @param $name
+     * @param       $value
+     * @param       $label
+     *
+     * @param array $attributes
      *
      * @return mixed
      */
-    private function getLabel($name)
+    private function option($value, $label, $attributes = [])
     {
-        return ucfirst(str_replace('_', ' ', $name));
+        return sprintf('<option value="%s" %s>%s</option>', $value, $this->attributeList($attributes), $label);
     }
 
     /**
-     * @param $name
-     * @param $rememberOld
+     * @param $label
      *
-     * @return string
+     * @return mixed
      */
-    private function getValue($name, $rememberOld)
+    public function submit($label)
     {
-        return $rememberOld ? $this->getOld($name, $this->getModelValue($name)) : '';
-    }
-
-    /**
-     * @param $name
-     *
-     * @return string
-     */
-    public function getModelValue($name)
-    {
-        if (isset($this->model) && isset($this->model->$name)) {
-            $this->model->$name;
-        }
-
-        return '';
-    }
-
-    /**
-     * @param string $field
-     *
-     * @param string $default
-     *
-     * @return string
-     */
-    public function getOld($field, $default = '')
-    {
-        if (isset($this->old[$field])) {
-            return $this->old[$field];
-        }
-
-        return $default;
+        return $this->formRow('', sprintf('<button type="submit">%s</button>', $label));
     }
 
     /**
@@ -220,39 +165,24 @@ class HtmlHelper
     }
 
     /**
-     * @return array
-     */
-    private function getErrors()
-    {
-        return isset($this->errors) ? $this->errors : [];
-    }
-
-    /**
      * @param $name
-     *
-     * @return string
-     */
-    private function getInputClass($name)
-    {
-        $errors = $this->getErrors();
-        if (isset($errors[$name])) {
-            return 'class="error-input"';
-        }
-
-        return '';
-    }
-
-    /**
-     * @param       $value
-     * @param       $label
-     *
-     * @param array $attributes
      *
      * @return mixed
      */
-    private function option($value, $label, $attributes = [])
+    private function formatLabel($name)
     {
-        return sprintf('<option value="%s" %s>%s</option>', $value, $this->attributeList($attributes), $label);
+        return ucfirst(str_replace('_', ' ', $name));
+    }
+
+    /**
+     * @param $label
+     * @param $input
+     *
+     * @return mixed
+     */
+    private function formRow($label, $input)
+    {
+        return sprintf('<div class="row"><label>%s</label>%s</div>', $label, $input);
     }
 
     /**
@@ -289,6 +219,64 @@ class HtmlHelper
     }
 
     /**
+     * @param $name
+     * @param $rememberOld
+     *
+     * @return string
+     */
+    private function getValue($name, $rememberOld)
+    {
+        return $rememberOld ? $this->getOld($name, $this->getModelValue($name)) : '';
+    }
+
+    /**
+     * @param $name
+     *
+     * @return string
+     */
+    private function getModelValue($name)
+    {
+        if (isset($this->model->$name)) {
+            return $this->model->$name;
+        }
+
+        return '';
+    }
+
+    /**
+     * @param string $field
+     *
+     * @param string $default
+     *
+     * @return string
+     */
+    private function getOld($field, $default = '')
+    {
+        if (isset($this->old[$field])) {
+            return $this->old[$field];
+        }
+
+        return $default;
+    }
+
+
+    /**
+     * @param $old
+     */
+    public function setOld($old)
+    {
+        $this->old = $old;
+    }
+
+    /**
+     * @return array
+     */
+    private function getErrors()
+    {
+        return isset($this->errors) ? $this->errors : [];
+    }
+
+    /**
      * @param $errors
      */
     public function setErrors($errors)
@@ -297,10 +285,35 @@ class HtmlHelper
     }
 
     /**
-     * @param $old
+     * @param $name
+     *
+     * @return bool
      */
-    public function setOld($old)
+    private function hasError($name)
     {
-        $this->old = $old;
+        return isset($this->errors[$name]);
+    }
+
+    /**
+     * @param Model|null $model
+     */
+    public function setModel($model)
+    {
+        $this->model = $model;
+    }
+
+    /**
+     * @param $name
+     * @param $attributes
+     *
+     * @return mixed
+     */
+    private function maybeAddError($name, $attributes)
+    {
+        if ($this->hasError($name)) {
+            $attributes['class'] = 'error-input';
+            return $attributes;
+        }
+        return $attributes;
     }
 }

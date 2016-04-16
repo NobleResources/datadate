@@ -2,7 +2,7 @@
 
 namespace DataDate;
 
-use User;
+use DataDate\Database\Models\User;
 
 class Session
 {
@@ -28,6 +28,11 @@ class Session
     public function flash($name, $value)
     {
         $this->ciSession->set_flashdata($name, $value);
+    }
+
+    public function reflash($name)
+    {
+        $this->ciSession->keep_flashdata($name);
     }
 
     /**
@@ -74,6 +79,7 @@ class Session
         $this->store('userId', $user->id);
     }
 
+
     /**
      * @return User
      */
@@ -84,7 +90,6 @@ class Session
         return $userId === null ? null : User::find($userId);
     }
 
-    
     public function unsetUser()
     {
         $this->ciSession->unset_userdata('userId');

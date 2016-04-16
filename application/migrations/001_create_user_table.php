@@ -10,11 +10,11 @@ class Migration_Create_user_table extends CI_Migration
             'password' => ['type' => 'VARCHAR', 'constraint' => 255],
         ]);
 
-        $this->dbforge->create_table('user');
+        $this->dbforge->create_table('users');
     }
 
     public function down()
     {
-        $this->dbforge->drop_table('user');
+        $this->dbforge->drop_table('users');
     }
 }

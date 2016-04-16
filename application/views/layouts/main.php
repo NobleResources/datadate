@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>DataDate</title>
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="<?= $this->url->generate('/css/main.css') ?>">
 </head>
 <body>
 <header>
@@ -12,18 +12,18 @@
     <nav>
         <?php if (isset($user)): ?>
             <div>
-                <a class="button" href="/profile">My profile</a>
+                <a class="button" href="<?= $this->url->generate('/profile') ?>">My profile</a>
             </div>
             <div>
-                <a class="button" href="/signout">Sign out</a>
+                <a class="button" href="<?= $this->url->generate('/signout') ?>">Sign out</a>
             </div>
         <?php elseif ($uri === '/signup'): ?>
             <div>
-                <a class="button" href="/signin">Sign in</a>
+                <a class="button" href="<?= $this->url->generate('/signin') ?>">Sign in</a>
             </div>
         <?php else: ?>
             <div>
-                <a class="button" href="/signup">Sign up</a>
+                <a class="button" href="<?= $this->url->generate('/signup') ?>">Sign up</a>
             </div>
         <?php endif; ?>
     </nav>

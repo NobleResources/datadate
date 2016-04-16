@@ -3,11 +3,12 @@
 namespace DataDate\Services;
 
 use DataDate\Http\Request;
-use DataDate\Http\Responses\Redirect;
+use DataDate\Http\Responses\RedirectResponse;
 use DataDate\Session;
 
 class Redirector
 {
+
     /**
      * @var Session
      */
@@ -16,31 +17,37 @@ class Redirector
      * @var Request
      */
     private $request;
+    /**
+     * @var UrlGenerator
+     */
+    private $urlGenerator;
 
     /**
      * Redirector constructor.
      *
-     * @param Session $session
-     * @param Request $request
+     * @param UrlGenerator $urlGenerator
+     * @param Session      $session
+     * @param Request      $request
      */
-    public function __construct(Session $session, Request $request)
+    public function __construct(UrlGenerator $urlGenerator, Session $session, Request $request)
     {
         $this->session = $session;
         $this->request = $request;
+        $this->urlGenerator = $urlGenerator;
     }
 
     /**
      * @param string $uri
      *
-     * @return Redirect
+     * @return RedirectResponse
      */
     public function to($uri)
     {
-        return new Redirect($this->session, $uri);
+        return new RedirectResponse($this->session, $this->urlGenerator->generate($uri));
     }
 
     /**
-     * @return Redirect
+     * @return RedirectResponse
      */
     public function back()
     {
@@ -48,20 +55,22 @@ class Redirector
     }
 
     /**
-     * @return Redirect
+     * @return RedirectResponse
      */
     public function guest()
     {
         $this->session->flash('intended', $this->request->uri());
 
-        return $this->to('signin');
+        return $this->to('/signin');
     }
 
     /**
-     * @return Redirect
+     * @param string $default
+     *
+     * @return RedirectResponse
      */
-    public function intended()
+    public function intended($default = '/')
     {
-        return $this->to($this->session->pull('intended', '/'));
+        return $this->to($this->session->pull('intended', $default));
     }
 }

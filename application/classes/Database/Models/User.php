@@ -1,6 +1,6 @@
 <?php
 
-use DataDate\Database\Model;
+namespace DataDate\Database\Models;
 
 class User extends Model
 {

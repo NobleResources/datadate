@@ -1,13 +1,13 @@
 <form id="signup-form" action="" method="POST">
-    <?= $this->csrfField() ?>
-    <?= $this->errorList() ?>
-    <?= $this->formInput('email', 'email') ?>
-    <?= $this->formInput('nickname', 'text')?>
-    <?= $this->formInput('password', 'password', false) ?>
-    <?= $this->formInput('password_confirmation', 'password', false) ?>
-    <?= $this->formInput('first_name', 'text')?>
-    <?= $this->formInput('last_name', 'text')?>
-    <?= $this->formSelect('gender', ['male' => 'Male', 'female' => 'Female']) ?>
-    <?= $this->formInput('birthday', 'date')?>
-    <?= $this->formSubmit('Sign up') ?>
+    <?= $this->html->csrfField() ?>
+    <?= $this->html->errorList() ?>
+    <?= $this->html->input('email', 'email') ?>
+    <?= $this->html->input('nickname', 'text')?>
+    <?= $this->html->input('password', 'password', false) ?>
+    <?= $this->html->input('password_confirmation', 'password', false) ?>
+    <?= $this->html->input('first_name', 'text')?>
+    <?= $this->html->input('last_name', 'text')?>
+    <?= $this->html->select('gender', ['male' => 'Male', 'female' => 'Female']) ?>
+    <?= $this->html->input('birthday', 'date')?>
+    <?= $this->html->submit('Sign up') ?>
 </form>
